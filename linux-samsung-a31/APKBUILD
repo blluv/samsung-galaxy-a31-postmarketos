@@ -1,0 +1,80 @@
+# Reference: <https://postmarketos.org/vendorkernel>
+# Kernel config based on: arch/arm64/configs/(CHANGEME!)
+
+pkgname=linux-samsung-a31
+pkgver=4.14.186
+pkgrel=0
+pkgdesc="samsung Samsung Galaxy A31 kernel fork"
+arch="aarch64"
+_carch="arm64"
+_flavor="samsung-a31"
+url="https://kernel.org"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps pmb:cross-native"
+makedepends="
+	bash
+	bc
+	bison
+	devicepkg-dev
+	findutils
+	flex
+	openssl-dev
+	perl
+	cpio
+	xz
+	linux-headers
+"
+
+# Source
+_repository="android_kernel_samsung_mt6768"
+_commit="48d7bfb222e1e722b9c77f78beef056d0011f4cc"
+_config="config-$_flavor.$arch"
+source="
+	$pkgname-$_commit.tar.gz::https://github.com/blluv/$_repository/archive/$_commit.tar.gz
+	$_config
+	a.patch
+	b.patch
+	c.patch
+	d.patch
+	e.patch
+	f.patch
+	g.patch
+	gzip.patch
+"
+builddir="$srcdir/$_repository-$_commit"
+_outdir="out"
+
+prepare() {
+	default_prepare
+	REPLACE_GCCH=0
+	. downstreamkernel_prepare
+}
+
+build() {
+	unset LDFLAGS
+	make O="$_outdir" ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-postmarketOS"
+	echo $PWD $_outdir
+	cp $_outdir/arch/$_carch/boot/Image.gz $_outdir/arch/$_carch/boot/zImage
+}
+
+package() {
+	downstreamkernel_package "$builddir" "$pkgdir" "$_carch" \
+		"$_flavor" "$_outdir"
+
+	make dtbs_install O="$_outdir" ARCH="$_carch" \
+		INSTALL_DTBS_PATH="$pkgdir"/boot/dtbs
+}
+
+sha512sums="
+910c41ebb7f15feb038ef7928d000ed44707b140ed641237c2f3e9b804247179d25170ee64fb33a174fbf4c9ba65668558cb433eadc32ac2f8f6feaeb38f4e9c  linux-samsung-a31-48d7bfb222e1e722b9c77f78beef056d0011f4cc.tar.gz
+5218f6d1db1c849445a63fa1d207acc893f49294e9a1035a63ebbfbd8f2d4f00d07052ed3cca4e7f6ebf8b777ee020559c55c6fb28964237f88a91f7fffc9c33  config-samsung-a31.aarch64
+25846155c5bf1e1f2edaa658e29d292f12bb6f09c2dec92cca39543e53920790d7e769e87f730f5d7280b4e8458844bc26fd730999b4bf3ad00796356da4a85f  a.patch
+8e28419425288d59d0363c1d78ce3c9a353bf76d06ccd3c12ead0871af46c0fab556601561dde9c2906ba00726cca9d61dd347225b05f7b751494b31a8c2f201  b.patch
+5af30c6560a0381e9d45eed8d39411c8ebef848be9b13060565042f904b5740c15fa7a7f7f8f6ef2db14ab900ce46bdcbb90580f23b9a7cf82567ba114fe5fa1  c.patch
+f316335fbfd2ea5dae7e9f109307f2e06b341595b07b89e544c8cbdf1ac6435f6fcd4e4694f9742d77fbece062a9083487a680a55761301b9ce78625312517d0  d.patch
+50cd5e9e7776d6ae9cfc86a32e01375e241f6f84e041800d5da477ee8e0efda440651efc52faeeb6a63b6ca64d4a87d00f17d2628cfa3318d6256d57fde651ca  e.patch
+3d32f449e10a7df0b591be9c78609ea60af32dc4f95cf66edd672a8bba80aedaf45cbd91cdc1012ace437f4d431b9ed44c213a03a4a0a90a4fc20727f53a18c5  f.patch
+3b139f775eec7d41c4baae6550c3d1036e9d853f5fedcb1992d7cff56b2922fcf42f363f79ad7a718fe79ee10bd0bc87c4c68187fa6332f478d4ec288d12a2cf  g.patch
+ef2e7d80e4fa5676fa2beee4d98b66555a84ae728cbe7f0195993185a0e8d0f059092df3ddfd33fca9e063237ffc6ae6ba059d67590d14732f1ac47e1a25eb7e  gzip.patch
+"

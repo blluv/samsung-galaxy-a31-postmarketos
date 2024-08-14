@@ -1,0 +1,26 @@
+diff --git a/drivers/battery/common/sec_charging_common.h b/drivers/battery/common/sec_charging_common.h
+index a57250497..df39ba035 100755
+--- a/drivers/battery/common/sec_charging_common.h
++++ b/drivers/battery/common/sec_charging_common.h
+@@ -634,7 +634,7 @@ typedef struct {
+ 	unsigned int asoc;
+ } battery_health_condition;
+ 
+-inline void battery_wakeup_source_init(struct device *dev, struct wakeup_source **ws, const char *name);
++void battery_wakeup_source_init(struct device *dev, struct wakeup_source **ws, const char *name);
+ 
+ static inline struct power_supply *get_power_supply_by_name(char *name)
+ {
+diff --git a/include/linux/keyslot-manager.h b/include/linux/keyslot-manager.h
+index e247be8a5..631d8e311 100755
+--- a/include/linux/keyslot-manager.h
++++ b/include/linux/keyslot-manager.h
+@@ -98,7 +98,7 @@ int keyslot_manager_derive_raw_secret(struct keyslot_manager *ksm,
+ 				      unsigned int wrapped_key_size,
+ 				      u8 *secret, unsigned int secret_size);
+ 
+-inline void ksm_flock(struct keyslot_manager *ksm, unsigned int flags);
++void ksm_flock(struct keyslot_manager *ksm, unsigned int flags);
+ 
+ #endif /* CONFIG_BLK_INLINE_ENCRYPTION */
+ 
